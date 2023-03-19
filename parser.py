@@ -5,7 +5,7 @@ Notes:
 
 Run as:
 
-    $ python3 parsers.py --test_arg <test_arg>
+    $ python3 parser.py --test_arg <test_arg>
 
 """
 import argparse
