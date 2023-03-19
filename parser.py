@@ -96,13 +96,6 @@ def run(
         axs[0, 1].set_title('sim')
         plt.show()
 
-    # for sol in ['arg', 'eku', 'h2']:
-    #     for num in range(1,11):
-    #         if type == 'exp':
-    #             file = './exp/' + sol + str(num) + '.csv'
-    #         else:
-    #             file = './' + type + '/' + sol + '/ep' + str(num) + '.csv'
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parsing script')
