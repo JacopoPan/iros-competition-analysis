@@ -84,6 +84,23 @@ def run(
             axs[1, 1].plot(time, y, label='sim')
             axs[2, 1].plot(time, z, label='sim')
 
+            with open('./sim/' + sol + '/episode' + str(num) + '.csv') as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=',')
+                time = []
+                ref_x = []
+                ref_y = []
+                ref_z = []
+                for i, row in enumerate(csv_reader):
+                    if i == 0:
+                        continue
+                    time.append(float(row[0]))
+                    ref_x.append(float(row[2]))
+                    ref_y.append(float(row[3]))
+                    ref_z.append(float(row[4]))
+                axs[0, 1].plot(time, ref_x, label='ref')
+                axs[1, 1].plot(time, ref_y, label='ref')
+                axs[2, 1].plot(time, ref_z, label='ref')
+
         fig.suptitle(sol)
         axs[2, 0].set_xlabel('time')
         axs[2, 1].set_xlabel('time')
