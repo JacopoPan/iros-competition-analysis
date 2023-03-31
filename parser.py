@@ -58,6 +58,9 @@ def run(
                 axs[1, 0].plot(time, y, label='exp')
                 axs[2, 0].plot(time, z, label='exp')
 
+
+            #################
+
             folder = './sim/' + sol + '/ep' + str(num)
             with open(folder + '/x0.csv') as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=',')
