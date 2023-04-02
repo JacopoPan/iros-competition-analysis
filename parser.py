@@ -10,6 +10,7 @@ Run as:
 """
 import argparse
 import numpy as np
+import pandas as pd
 import bagpy
 from bagpy import bagreader
 import pickle
@@ -59,6 +60,8 @@ def run(
                         real_ref_init_time = float(row[0])
                         first_cmd_time = real_ref_init_time
                     real_ref_time[idx].append(float(row[0])-real_ref_init_time)
+                    if row[1] == 'takeoff' or row[1] == 'none':
+                        pass
                     real_ref_x[idx].append(float(row[2]))
                     real_ref_y[idx].append(float(row[3]))
                     real_ref_z[idx].append(float(row[4]))
@@ -83,6 +86,8 @@ def run(
                 for i, row in enumerate(csv_reader):
                     if i == 0: continue
                     sim_ref_time.append(float(row[0]))
+                    if row[1] == 'takeoff' or row[1] == 'none':
+                        pass
                     sim_ref_x[idx].append(float(row[2]))
                     sim_ref_y[idx].append(float(row[3]))
                     sim_ref_z[idx].append(float(row[4]))
@@ -112,12 +117,6 @@ def run(
                 exit()
             sim_time[idx] = sim_x_time
 
-            # comparing time sampling
-            print(sim_time[idx][0], sim_time[idx][-1], len(sim_time[idx]))
-            print(real_ref_time[idx][0], real_ref_time[idx][-1], len(real_ref_time[idx]))
-            print(real_time[idx][0], real_time[idx][-1], len(real_time[idx]))
-            print()
-
             # plot one-by-one
             axs[0, 0].plot(real_ref_time[idx], real_ref_x[idx], label='ref')
             axs[1, 0].plot(real_ref_time[idx], real_ref_y[idx], label='ref')
@@ -134,6 +133,11 @@ def run(
             axs[0, 3].plot(sim_time[idx], sim_x[idx], label='sim')
             axs[1, 3].plot(sim_time[idx], sim_y[idx], label='sim')
             axs[2, 3].plot(sim_time[idx], sim_z[idx], label='sim')
+
+            # comparing time sampling
+            print(sim_time[idx][0], sim_time[idx][-1], len(sim_time[idx]))
+            print(real_ref_time[idx][0], real_ref_time[idx][-1], len(real_ref_time[idx]))
+            print(real_time[idx][0], real_time[idx][-1], len(real_time[idx]))
 
         # labels
         fig.suptitle(sol)
