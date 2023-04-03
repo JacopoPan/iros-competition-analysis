@@ -8,21 +8,14 @@ Run as:
     $ python3 parser.py --test_arg <test_arg>
 
 """
-import io
 import argparse
 import numpy as np
-import pandas as pd
 from scipy.interpolate import interp1d   
-import traces
-import datetime
-from datetime import timedelta
-import bagpy
-from bagpy import bagreader
-import pickle
 import csv
-import os
-import re
 import matplotlib.pyplot as plt
+# import bagpy
+# from bagpy import bagreader
+# import pickle
 
 
 def run(
@@ -123,26 +116,43 @@ def run(
             sim_time[idx] = sim_x_time
 
             # math magic
-            time = np.array(real_time[idx])
-            values = np.array(real_x[idx])
-            func = interp1d(time, values, kind='linear')
-            t_new = np.linspace(
-                max( min(sim_time[idx]), min(real_time[idx]) ), # REDO: min val in sim_time that is greater than min val in real_time
-                min( max(sim_time[idx]), max(real_time[idx]) ), # REDO: max val in sim_time that is less than max val in real_time
-                len(sim_time[idx])
-                )
-            v_new = func(t_new)
-            print(t_new, v_new)
+            t_new = []
+            for val in sim_time[idx]:
+                if val >= real_ref_time[idx][0] and val >= real_time[idx][0]:
+                    t_new.append(val)
+                if val >= real_ref_time[idx][-1] or val >= real_time[idx][-1]:
+                    print('Something is not right')
+                    exit()
+            t_new = np.array(t_new)
+
+            real_ref_x_func = interp1d(np.array(real_ref_time[idx]), np.array(real_ref_x[idx]), kind='linear')
+            resampled_real_ref_x = real_ref_x_func(t_new)
+            real_ref_y_func = interp1d(np.array(real_ref_time[idx]), np.array(real_ref_y[idx]), kind='linear')
+            resampled_real_ref_y = real_ref_y_func(t_new)
+            real_ref_z_func = interp1d(np.array(real_ref_time[idx]), np.array(real_ref_z[idx]), kind='linear')
+            resampled_real_ref_z = real_ref_z_func(t_new)
+
+            real_x_func = interp1d(np.array(real_time[idx]), np.array(real_x[idx]), kind='linear')
+            resampled_real_x = real_x_func(t_new)
+            real_y_func = interp1d(np.array(real_time[idx]), np.array(real_y[idx]), kind='linear')
+            resampled_real_y = real_y_func(t_new)
+            real_z_func = interp1d(np.array(real_time[idx]), np.array(real_z[idx]), kind='linear')
+            resampled_real_z = real_z_func(t_new)
 
             # plot one-by-one
-            axs[0, 0].plot(real_ref_time[idx], real_ref_x[idx], label='ref')
-            axs[1, 0].plot(real_ref_time[idx], real_ref_y[idx], label='ref')
-            axs[2, 0].plot(real_ref_time[idx], real_ref_z[idx], label='ref')
+            # axs[0, 0].plot(real_ref_time[idx], real_ref_x[idx], label='ref')
+            # axs[1, 0].plot(real_ref_time[idx], real_ref_y[idx], label='ref')
+            # axs[2, 0].plot(real_ref_time[idx], real_ref_z[idx], label='ref')
+            axs[0, 0].plot(t_new, resampled_real_ref_x, label='ref')
+            axs[1, 0].plot(t_new, resampled_real_ref_y, label='ref')
+            axs[2, 0].plot(t_new, resampled_real_ref_z, label='ref')
 
             # axs[0, 1].plot(real_time[idx], real_x[idx], label='exp')
-            axs[0, 1].plot(t_new, v_new, label='exp') # TEST
-            axs[1, 1].plot(real_time[idx], real_y[idx], label='exp')
-            axs[2, 1].plot(real_time[idx], real_z[idx], label='exp')
+            # axs[1, 1].plot(real_time[idx], real_y[idx], label='exp')
+            # axs[2, 1].plot(real_time[idx], real_z[idx], label='exp')
+            axs[0, 1].plot(t_new, resampled_real_x, label='exp')
+            axs[1, 1].plot(t_new, resampled_real_y, label='exp')
+            axs[2, 1].plot(t_new, resampled_real_z, label='exp')
 
             axs[0, 2].plot(sim_time[idx], sim_ref_x[idx], label='ref')
             axs[1, 2].plot(sim_time[idx], sim_ref_y[idx], label='ref')
@@ -151,11 +161,6 @@ def run(
             axs[0, 3].plot(sim_time[idx], sim_x[idx], label='sim')
             axs[1, 3].plot(sim_time[idx], sim_y[idx], label='sim')
             axs[2, 3].plot(sim_time[idx], sim_z[idx], label='sim')
-
-            # comparing time sampling
-            print(sim_time[idx][0], sim_time[idx][-1], len(sim_time[idx]))
-            print(real_ref_time[idx][0], real_ref_time[idx][-1], len(real_ref_time[idx]))
-            print(real_time[idx][0], real_time[idx][-1], len(real_time[idx]))
 
         # labels
         fig.suptitle(sol)
