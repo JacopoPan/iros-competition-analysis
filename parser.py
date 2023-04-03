@@ -8,9 +8,14 @@ Run as:
     $ python3 parser.py --test_arg <test_arg>
 
 """
+import io
 import argparse
 import numpy as np
 import pandas as pd
+from scipy.interpolate import interp1d   
+import traces
+import datetime
+from datetime import timedelta
 import bagpy
 from bagpy import bagreader
 import pickle
@@ -116,6 +121,19 @@ def run(
                 print('Error: time mismatch')
                 exit()
             sim_time[idx] = sim_x_time
+
+            # math magic
+            time = np.array(real_time[idx])
+            values = np.array(real_x[idx])
+            func = interp1d(time, values, kind='linear')
+            t_new = np.linspace(
+                max( min(sim_time[idx]), min(real_time[idx]) ), # REDO: min val in sim_time that is greater than min val in real_time
+                min( max(sim_time[idx]), max(real_time[idx]) ), # REDO: max val in sim_time that is less than max val in real_time
+                len(sim_time[idx])
+                )
+            v_new = func(t_new)
+            print(t_new, v_new)
+            exit()
 
             # plot one-by-one
             axs[0, 0].plot(real_ref_time[idx], real_ref_x[idx], label='ref')
