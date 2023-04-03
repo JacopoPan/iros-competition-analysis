@@ -133,14 +133,14 @@ def run(
                 )
             v_new = func(t_new)
             print(t_new, v_new)
-            exit()
 
             # plot one-by-one
             axs[0, 0].plot(real_ref_time[idx], real_ref_x[idx], label='ref')
             axs[1, 0].plot(real_ref_time[idx], real_ref_y[idx], label='ref')
             axs[2, 0].plot(real_ref_time[idx], real_ref_z[idx], label='ref')
 
-            axs[0, 1].plot(real_time[idx], real_x[idx], label='exp')
+            # axs[0, 1].plot(real_time[idx], real_x[idx], label='exp')
+            axs[0, 1].plot(t_new, v_new, label='exp') # TEST
             axs[1, 1].plot(real_time[idx], real_y[idx], label='exp')
             axs[2, 1].plot(real_time[idx], real_z[idx], label='exp')
 
