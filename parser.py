@@ -22,6 +22,7 @@ def run(
         test_arg,
     ):
     for sol in ['arg', 'eku', 'h2']:
+        avg_real_cmd_timestep = 0
         fig, axs = plt.subplots(3, 4)
 
         real_ref_time = [[] for i in range(10)]
@@ -140,16 +141,21 @@ def run(
             resampled_real_z = real_z_func(t_new)
 
             # plot one-by-one
-            # axs[0, 0].plot(real_ref_time[idx], real_ref_x[idx], label='ref')
-            # axs[1, 0].plot(real_ref_time[idx], real_ref_y[idx], label='ref')
-            # axs[2, 0].plot(real_ref_time[idx], real_ref_z[idx], label='ref')
+            axs[0, 0].plot(real_ref_time[idx], real_ref_x[idx], label='ref')
+            axs[1, 0].plot(real_ref_time[idx], real_ref_y[idx], label='ref')
+            axs[2, 0].plot(real_ref_time[idx], real_ref_z[idx], label='ref')
+            #
             axs[0, 0].plot(t_new, resampled_real_ref_x, label='ref')
             axs[1, 0].plot(t_new, resampled_real_ref_y, label='ref')
             axs[2, 0].plot(t_new, resampled_real_ref_z, label='ref')
 
-            # axs[0, 1].plot(real_time[idx], real_x[idx], label='exp')
-            # axs[1, 1].plot(real_time[idx], real_y[idx], label='exp')
-            # axs[2, 1].plot(real_time[idx], real_z[idx], label='exp')
+            avg_time = (real_ref_time[idx][-1] - real_ref_time[idx][0]) / (len(real_ref_time[idx])-1)
+            avg_real_cmd_timestep += avg_time
+
+            axs[0, 1].plot(real_time[idx], real_x[idx], label='exp')
+            axs[1, 1].plot(real_time[idx], real_y[idx], label='exp')
+            axs[2, 1].plot(real_time[idx], real_z[idx], label='exp')
+            #
             axs[0, 1].plot(t_new, resampled_real_x, label='exp')
             axs[1, 1].plot(t_new, resampled_real_y, label='exp')
             axs[2, 1].plot(t_new, resampled_real_z, label='exp')
@@ -162,8 +168,10 @@ def run(
             axs[1, 3].plot(sim_time[idx], sim_y[idx], label='sim')
             axs[2, 3].plot(sim_time[idx], sim_z[idx], label='sim')
 
+        avg_real_cmd_timestep /= 10
+
         # labels
-        fig.suptitle(sol)
+        fig.suptitle(sol + ' ' + str(1/avg_real_cmd_timestep))
         axs[2, 0].set_xlabel('time')
         axs[2, 1].set_xlabel('time')
         axs[2, 2].set_xlabel('time')
