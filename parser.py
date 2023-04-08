@@ -171,7 +171,7 @@ def run(
         avg_real_cmd_timestep /= 10
 
         # labels
-        fig.suptitle(sol + ' ' + str(1/avg_real_cmd_timestep))
+        fig.suptitle(f'{sol} {1/avg_real_cmd_timestep:.2f}')
         axs[2, 0].set_xlabel('time')
         axs[2, 1].set_xlabel('time')
         axs[2, 2].set_xlabel('time')
