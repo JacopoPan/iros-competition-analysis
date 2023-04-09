@@ -1,6 +1,10 @@
 # VSCode
 .vscode
 
+# Outputs
+tikz/*tex
+png/*png
+
 # macOS users
 .DS_Store
 

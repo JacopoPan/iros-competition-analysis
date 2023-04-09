@@ -14,6 +14,7 @@ from scipy.interpolate import interp1d
 import csv
 import matplotlib.pyplot as plt
 import pybullet as p
+import tikzplotlib
 # import bagpy
 # from bagpy import bagreader
 # import pickle
@@ -25,7 +26,40 @@ def run(
     for sol in ['arg', 'eku', 'h2']:
         fig, axs = plt.subplots(6, 6)
 
+        real_ref_time = [[] for i in range(10)]
+        real_ref_x = [[] for i in range(10)]
+        real_ref_y = [[] for i in range(10)]
+        real_ref_z = [[] for i in range(10)]
+        real_time = [[] for i in range(10)]
+        real_x = [[] for i in range(10)]
+        real_y = [[] for i in range(10)]
+        real_z = [[] for i in range(10)]
+        real_q1 = [[] for i in range(10)]
+        real_q2 = [[] for i in range(10)]
+        real_q3 = [[] for i in range(10)]
+        real_q4 = [[] for i in range(10)]
+        
+        sim_time = [[] for i in range(10)]
+        sim_ref_x = [[] for i in range(10)]
+        sim_ref_y = [[] for i in range(10)]
+        sim_ref_z = [[] for i in range(10)]
+        sim_x = [[] for i in range(10)]
+        sim_y = [[] for i in range(10)]
+        sim_z = [[] for i in range(10)]
+        sim_r = [[] for i in range(10)]
+        sim_p = [[] for i in range(10)]
+        sim_j = [[] for i in range(10)]
+
         avg_real_cmd_timestep = 0
+
+        t_new = [[] for i in range(10)]
+        initial_skip = [0 for i in range(10)]
+        resampled_real_ref_x = [[] for i in range(10)]
+        resampled_real_ref_y = [[] for i in range(10)]
+        resampled_real_ref_z = [[] for i in range(10)]
+        resampled_real_x = [[] for i in range(10)]
+        resampled_real_y = [[] for i in range(10)]
+        resampled_real_z = [[] for i in range(10)]
 
         se_x = 0
         se_y = 0
@@ -35,48 +69,6 @@ def run(
         se_ref_y = 0
         se_ref_z = 0
         se_ref_count = 0
-
-        real_ref_time = [[] for i in range(10)]
-        real_ref_x = [[] for i in range(10)]
-        real_ref_y = [[] for i in range(10)]
-        real_ref_z = [[] for i in range(10)]
-        real_ref_vx = [[] for i in range(10)]
-        real_ref_vy = [[] for i in range(10)]
-        real_ref_vz = [[] for i in range(10)]
-
-        resampled_real_ref_x = [[] for i in range(10)]
-        resampled_real_ref_y = [[] for i in range(10)]
-        resampled_real_ref_z = [[] for i in range(10)]
-
-        real_time = [[] for i in range(10)]
-        real_x = [[] for i in range(10)]
-        real_y = [[] for i in range(10)]
-        real_z = [[] for i in range(10)]
-        real_q1 = [[] for i in range(10)]
-        real_q2 = [[] for i in range(10)]
-        real_q3 = [[] for i in range(10)]
-        real_q4 = [[] for i in range(10)]
-
-        resampled_real_x = [[] for i in range(10)]
-        resampled_real_y = [[] for i in range(10)]
-        resampled_real_z = [[] for i in range(10)]
-
-        t_new = [[] for i in range(10)]
-        largest_initial_skip = -1
-        initial_skip = [0 for i in range(10)]
-        
-        sim_time = [[] for i in range(10)]
-
-        sim_ref_x = [[] for i in range(10)]
-        sim_ref_y = [[] for i in range(10)]
-        sim_ref_z = [[] for i in range(10)]
-
-        sim_x = [[] for i in range(10)]
-        sim_y = [[] for i in range(10)]
-        sim_z = [[] for i in range(10)]
-        sim_r = [[] for i in range(10)]
-        sim_p = [[] for i in range(10)]
-        sim_j = [[] for i in range(10)]
 
         for num in range(1,11):
             idx = num-1
@@ -176,7 +168,6 @@ def run(
                 if val >= real_ref_time[idx][-1] or val >= real_time[idx][-1]:
                     print('Something is not right')
                     exit()
-            largest_initial_skip = max(largest_initial_skip, initial_skip[idx])
             t_new[idx] = np.array(t_new[idx])
 
             real_ref_x_func = interp1d(np.array(real_ref_time[idx]), np.array(real_ref_x[idx]), kind='linear')
@@ -240,8 +231,6 @@ def run(
             axs[4, 3].plot(sim_time[idx], sim_p[idx], label='sim')
             axs[5, 3].plot(sim_time[idx], sim_j[idx], label='sim')
 
-            
-
             se_x += np.sum((resampled_real_x[idx] - np.array(sim_x[idx][initial_skip[idx]:]))**2)
             se_y += np.sum((resampled_real_y[idx] - np.array(sim_y[idx][initial_skip[idx]:]))**2)
             se_z += np.sum((resampled_real_z[idx] - np.array(sim_z[idx][initial_skip[idx]:]))**2)
@@ -260,12 +249,15 @@ def run(
             axs[1, 5].plot(t_new[idx], (sim_ref_y[idx][initial_skip[idx]:]-resampled_real_ref_y[idx])**2, label='diff')
             axs[2, 5].plot(t_new[idx], (sim_ref_z[idx][initial_skip[idx]:]-resampled_real_ref_z[idx])**2, label='diff')
 
-        mse_x = se_x/se_count
-        rmse_x = np.sqrt(mse_x)
-        mse_y = se_y/se_count
-        rmse_y = np.sqrt(mse_y)
-        mse_z = se_z/se_count
-        rmse_z = np.sqrt(mse_z)
+        latest_start = -1
+        earliest_end = 100000
+        for i in range(10):
+            latest_start = max(latest_start, t_new[i][0])
+            earliest_end = min(earliest_end, t_new[i][-1])
+            print(t_new[i][0], t_new[i][-1])
+        print(latest_start, earliest_end)
+        for i in range(10):
+            print(f'{initial_skip[i]} {t_new[i][0]:.3f}', t_new[i].shape, np.array(sim_x[i][initial_skip[i]:]).shape, np.array(sim_ref_x[i][initial_skip[i]:]).shape, np.array(resampled_real_x[i]).shape, np.array(resampled_real_ref_x[i]).shape)
 
         mse_ref_x = se_ref_x/se_ref_count
         rmse_ref_x = np.sqrt(mse_ref_x)
@@ -273,16 +265,16 @@ def run(
         rmse_ref_y = np.sqrt(mse_ref_y)
         mse_ref_z = se_ref_z/se_ref_count
         rmse_ref_z = np.sqrt(mse_ref_z)
-
         avg_real_cmd_timestep /= 10
         real_cmd_freq =  1/avg_real_cmd_timestep
+        print(f'rmse_ref_xyz ({rmse_ref_x:.2f} {rmse_ref_y:.2f} {rmse_ref_z:.2f}) real_cmd_freq {real_cmd_freq:.2f}')
 
-        print(f'rmse_ref_xyz ({rmse_ref_x:.2f} {rmse_ref_y:.2f} {rmse_ref_z:.2f})')
-        print(real_cmd_freq)
-        print(largest_initial_skip)
-
-        for i in range(10):
-            print(f'{t_new[i][0]:.3f}', t_new[i].shape, np.array(sim_x[i][initial_skip[i]:]).shape, np.array(sim_ref_x[i][initial_skip[i]:]).shape, np.array(resampled_real_x[i]).shape, np.array(resampled_real_ref_x[i]).shape)
+        mse_x = se_x/se_count
+        rmse_x = np.sqrt(mse_x)
+        mse_y = se_y/se_count
+        rmse_y = np.sqrt(mse_y)
+        mse_z = se_z/se_count
+        rmse_z = np.sqrt(mse_z)
 
         # labels
         fig.suptitle(f'{sol}, rmse_xyz ({rmse_x:.2f} {rmse_y:.2f} {rmse_z:.2f})')
@@ -328,7 +320,32 @@ def run(
         axs[2, 3].set_ylim(-3.5,3.5)
         axs[2, 4].set_ylim(0,7)
         axs[2, 5].set_ylim(0,7)
-        plt.show()
+
+        if sol =='arg':
+            axs[3, 1].set_ylim(-3.5,3.5)
+            axs[4, 1].set_ylim(-3.5,3.5)
+            axs[5, 1].set_ylim(-3.5,3.5)
+            axs[3, 3].set_ylim(-3.5,3.5)
+            axs[4, 3].set_ylim(-3.5,3.5)
+            axs[5, 3].set_ylim(-3.5,3.5)
+        elif sol =='eku':
+            axs[3, 1].set_ylim(-3.5,3.5)
+            axs[4, 1].set_ylim(-3.5,3.5)
+            axs[5, 1].set_ylim(-3.5,3.5)
+            axs[3, 3].set_ylim(-3.5,3.5)
+            axs[4, 3].set_ylim(-3.5,3.5)
+            axs[5, 3].set_ylim(-3.5,3.5)
+        if sol =='h2':
+            axs[3, 1].set_ylim(-3.5,3.5)
+            axs[4, 1].set_ylim(-3.5,3.5)
+            axs[5, 1].set_ylim(-3.5,3.5)
+            axs[3, 3].set_ylim(-3.5,3.5)
+            axs[4, 3].set_ylim(-3.5,3.5)
+            axs[5, 3].set_ylim(-3.5,3.5)
+
+        tikzplotlib.save('./tikz/' + sol + '.tex')
+        plt.savefig('./png/' + sol + '.png')
+        # plt.show()
 
 
 if __name__ == '__main__':
