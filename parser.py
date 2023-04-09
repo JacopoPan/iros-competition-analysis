@@ -25,41 +25,42 @@ def run(
     ):
     for sol in ['arg', 'eku', 'h2']:
         fig, axs = plt.subplots(6, 6)
+        num_files = 10
 
-        real_ref_time = [[] for i in range(10)]
-        real_ref_x = [[] for i in range(10)]
-        real_ref_y = [[] for i in range(10)]
-        real_ref_z = [[] for i in range(10)]
-        real_time = [[] for i in range(10)]
-        real_x = [[] for i in range(10)]
-        real_y = [[] for i in range(10)]
-        real_z = [[] for i in range(10)]
-        real_q1 = [[] for i in range(10)]
-        real_q2 = [[] for i in range(10)]
-        real_q3 = [[] for i in range(10)]
-        real_q4 = [[] for i in range(10)]
+        real_ref_time = [[] for i in range(num_files)]
+        real_ref_x = [[] for i in range(num_files)]
+        real_ref_y = [[] for i in range(num_files)]
+        real_ref_z = [[] for i in range(num_files)]
+        real_time = [[] for i in range(num_files)]
+        real_x = [[] for i in range(num_files)]
+        real_y = [[] for i in range(num_files)]
+        real_z = [[] for i in range(num_files)]
+        real_q1 = [[] for i in range(num_files)]
+        real_q2 = [[] for i in range(num_files)]
+        real_q3 = [[] for i in range(num_files)]
+        real_q4 = [[] for i in range(num_files)]
         
-        sim_time = [[] for i in range(10)]
-        sim_ref_x = [[] for i in range(10)]
-        sim_ref_y = [[] for i in range(10)]
-        sim_ref_z = [[] for i in range(10)]
-        sim_x = [[] for i in range(10)]
-        sim_y = [[] for i in range(10)]
-        sim_z = [[] for i in range(10)]
-        sim_r = [[] for i in range(10)]
-        sim_p = [[] for i in range(10)]
-        sim_j = [[] for i in range(10)]
+        sim_time = [[] for i in range(num_files)]
+        sim_ref_x = [[] for i in range(num_files)]
+        sim_ref_y = [[] for i in range(num_files)]
+        sim_ref_z = [[] for i in range(num_files)]
+        sim_x = [[] for i in range(num_files)]
+        sim_y = [[] for i in range(num_files)]
+        sim_z = [[] for i in range(num_files)]
+        sim_r = [[] for i in range(num_files)]
+        sim_p = [[] for i in range(num_files)]
+        sim_j = [[] for i in range(num_files)]
 
         avg_real_cmd_timestep = 0
 
-        t_new = [[] for i in range(10)]
-        initial_skip = [0 for i in range(10)]
-        resampled_real_ref_x = [[] for i in range(10)]
-        resampled_real_ref_y = [[] for i in range(10)]
-        resampled_real_ref_z = [[] for i in range(10)]
-        resampled_real_x = [[] for i in range(10)]
-        resampled_real_y = [[] for i in range(10)]
-        resampled_real_z = [[] for i in range(10)]
+        t_new = [[] for i in range(num_files)]
+        initial_skip = [0 for i in range(num_files)]
+        resampled_real_ref_x = [[] for i in range(num_files)]
+        resampled_real_ref_y = [[] for i in range(num_files)]
+        resampled_real_ref_z = [[] for i in range(num_files)]
+        resampled_real_x = [[] for i in range(num_files)]
+        resampled_real_y = [[] for i in range(num_files)]
+        resampled_real_z = [[] for i in range(num_files)]
 
         se_x = 0
         se_y = 0
@@ -70,7 +71,7 @@ def run(
         se_ref_z = 0
         se_ref_count = 0
 
-        for num in range(1,11):
+        for num in range(1,num_files+1):
             idx = num-1
 
             # real cmd
@@ -250,24 +251,66 @@ def run(
             axs[2, 5].plot(t_new[idx], (sim_ref_z[idx][initial_skip[idx]:]-resampled_real_ref_z[idx])**2, label='diff')
 
         latest_start = -1
-        earliest_end = 100000
-        for i in range(10):
+        earliest_end = 9000
+        for i in range(num_files):
+            if sol == 'eku' and i == 1:
+                continue
             latest_start = max(latest_start, t_new[i][0])
             earliest_end = min(earliest_end, t_new[i][-1])
-            print(t_new[i][0], t_new[i][-1])
+            # print(t_new[i][0], t_new[i][-1])
         print(latest_start, earliest_end)
-        for i in range(10):
-            print(f'{initial_skip[i]} {t_new[i][0]:.3f}', t_new[i].shape, np.array(sim_x[i][initial_skip[i]:]).shape, np.array(sim_ref_x[i][initial_skip[i]:]).shape, np.array(resampled_real_x[i]).shape, np.array(resampled_real_ref_x[i]).shape)
+        for i in range(num_files):
+            pass
+            # print(f'{initial_skip[i]} {t_new[i][0]:.3f}', t_new[i].shape, np.array(sim_x[i][initial_skip[i]:]).shape, np.array(sim_ref_x[i][initial_skip[i]:]).shape, np.array(resampled_real_x[i]).shape, np.array(resampled_real_ref_x[i]).shape)
+        
+        cropped_real_x = np.zeros((num_files, int((earliest_end-latest_start)*30)))
+        cropped_sim_x = np.zeros((num_files, int((earliest_end-latest_start)*30)))
+        cropped_real_y = np.zeros((num_files, int((earliest_end-latest_start)*30)))
+        cropped_sim_y = np.zeros((num_files, int((earliest_end-latest_start)*30)))
+        cropped_real_z = np.zeros((num_files, int((earliest_end-latest_start)*30)))
+        cropped_sim_z = np.zeros((num_files, int((earliest_end-latest_start)*30)))
 
-        mse_ref_x = se_ref_x/se_ref_count
-        rmse_ref_x = np.sqrt(mse_ref_x)
-        mse_ref_y = se_ref_y/se_ref_count
-        rmse_ref_y = np.sqrt(mse_ref_y)
-        mse_ref_z = se_ref_z/se_ref_count
-        rmse_ref_z = np.sqrt(mse_ref_z)
-        avg_real_cmd_timestep /= 10
-        real_cmd_freq =  1/avg_real_cmd_timestep
-        print(f'rmse_ref_xyz ({rmse_ref_x:.2f} {rmse_ref_y:.2f} {rmse_ref_z:.2f}) real_cmd_freq {real_cmd_freq:.2f}')
+        for i in range(num_files):
+            if sol == 'eku' and i == 1:
+                continue
+            insert_idx = 0
+            for j in range(len(t_new[i])):
+                if t_new[i][j] >= latest_start:
+                    cropped_real_x[i][insert_idx] = resampled_real_x[i][j]
+                    cropped_sim_x[i][insert_idx] = sim_x[i][j]
+                    cropped_real_y[i][insert_idx] = resampled_real_y[i][j]
+                    cropped_sim_y[i][insert_idx] = sim_y[i][j]
+                    cropped_real_z[i][insert_idx] = resampled_real_z[i][j]
+                    cropped_sim_z[i][insert_idx] = sim_z[i][j]
+                    insert_idx += 1
+                    if insert_idx == cropped_real_x.shape[1]:
+                        break
+
+        avg_real_x = np.average(cropped_real_x, axis=0)
+        avg_sim_x = np.average(cropped_sim_x, axis=0)
+        avg_rmse_x = np.sqrt(np.sum((avg_real_x-avg_sim_x)**2)/len(avg_real_x))
+        avg_real_y = np.average(cropped_real_y, axis=0)
+        avg_sim_y = np.average(cropped_sim_y, axis=0)
+        avg_rmse_y = np.sqrt(np.sum((avg_real_y-avg_sim_y)**2)/len(avg_real_y))
+        avg_real_z = np.average(cropped_real_z, axis=0)
+        avg_sim_z = np.average(cropped_sim_z, axis=0)
+        avg_rmse_z = np.sqrt(np.sum((avg_real_z-avg_sim_z)**2)/len(avg_real_z))
+        print(f'avg_rmse {avg_rmse_x:.2f} {avg_rmse_y:.2f} {avg_rmse_z:.2f}')
+
+        cropped_time = np.linspace(latest_start, earliest_end, cropped_real_x.shape[1])
+        axs[0, 4].plot(cropped_time, (avg_real_x-avg_sim_x)**2, label='diff')
+        axs[1, 4].plot(cropped_time, (avg_real_y-avg_sim_y)**2, label='diff')
+        axs[2, 4].plot(cropped_time, (avg_real_z-avg_sim_z)**2, label='diff')
+
+        # mse_ref_x = se_ref_x/se_ref_count
+        # rmse_ref_x = np.sqrt(mse_ref_x)
+        # mse_ref_y = se_ref_y/se_ref_count
+        # rmse_ref_y = np.sqrt(mse_ref_y)
+        # mse_ref_z = se_ref_z/se_ref_count
+        # rmse_ref_z = np.sqrt(mse_ref_z)
+        # avg_real_cmd_timestep /= 10
+        # real_cmd_freq =  1/avg_real_cmd_timestep
+        # print(f'rmse_ref_xyz ({rmse_ref_x:.2f} {rmse_ref_y:.2f} {rmse_ref_z:.2f}) real_cmd_freq {real_cmd_freq:.2f}')
 
         mse_x = se_x/se_count
         rmse_x = np.sqrt(mse_x)
@@ -277,7 +320,8 @@ def run(
         rmse_z = np.sqrt(mse_z)
 
         # labels
-        fig.suptitle(f'{sol}, rmse_xyz ({rmse_x:.2f} {rmse_y:.2f} {rmse_z:.2f})')
+        # fig.suptitle(f'{sol}, rmse_xyz ({rmse_x:.2f} {rmse_y:.2f} {rmse_z:.2f})')
+        fig.suptitle(f'{sol}, avg_rmse_xyz {avg_rmse_x:.2f} {avg_rmse_y:.2f} {avg_rmse_z:.2f}')
         axs[5, 0].set_xlabel('time')
         axs[5, 1].set_xlabel('time')
         axs[5, 2].set_xlabel('time')
@@ -300,52 +344,54 @@ def run(
         axs[0, 5].set_title('cmd_sq_diff')
 
         # axes limits
-        axs[0, 0].set_ylim(-3.5,3.5)
-        axs[0, 1].set_ylim(-3.5,3.5)
-        axs[0, 2].set_ylim(-3.5,3.5)
-        axs[0, 3].set_ylim(-3.5,3.5)
-        axs[0, 4].set_ylim(0,7)
-        axs[0, 5].set_ylim(0,7)
+        y_axis_range = 7
+        axs[0, 0].set_ylim(-y_axis_range/2,y_axis_range/2)
+        axs[0, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+        axs[0, 2].set_ylim(-y_axis_range/2,y_axis_range/2)
+        axs[0, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+        axs[0, 4].set_ylim(0,1.25*y_axis_range)
+        axs[0, 5].set_ylim(0,1.25*y_axis_range)
 
-        axs[1, 0].set_ylim(-3.5,3.5)
-        axs[1, 1].set_ylim(-3.5,3.5)
-        axs[1, 2].set_ylim(-3.5,3.5)
-        axs[1, 3].set_ylim(-3.5,3.5)
-        axs[1, 4].set_ylim(0,7)
-        axs[1, 5].set_ylim(0,7)
+        axs[1, 0].set_ylim(-y_axis_range/2,y_axis_range/2)
+        axs[1, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+        axs[1, 2].set_ylim(-y_axis_range/2,y_axis_range/2)
+        axs[1, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+        axs[1, 4].set_ylim(0,1.25*y_axis_range)
+        axs[1, 5].set_ylim(0,1.25*y_axis_range)
 
-        axs[2, 0].set_ylim(-3.5,3.5)
-        axs[2, 1].set_ylim(-3.5,3.5)
-        axs[2, 2].set_ylim(-3.5,3.5)
-        axs[2, 3].set_ylim(-3.5,3.5)
-        axs[2, 4].set_ylim(0,7)
-        axs[2, 5].set_ylim(0,7)
+        axs[2, 0].set_ylim(-y_axis_range/2,y_axis_range/2)
+        axs[2, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+        axs[2, 2].set_ylim(-y_axis_range/2,y_axis_range/2)
+        axs[2, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+        axs[2, 4].set_ylim(0,1.25*y_axis_range)
+        axs[2, 5].set_ylim(0,1.25*y_axis_range)
 
         if sol =='arg':
-            axs[3, 1].set_ylim(-3.5,3.5)
-            axs[4, 1].set_ylim(-3.5,3.5)
-            axs[5, 1].set_ylim(-3.5,3.5)
-            axs[3, 3].set_ylim(-3.5,3.5)
-            axs[4, 3].set_ylim(-3.5,3.5)
-            axs[5, 3].set_ylim(-3.5,3.5)
+            axs[3, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[4, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[5, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[3, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[4, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[5, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
         elif sol =='eku':
-            axs[3, 1].set_ylim(-3.5,3.5)
-            axs[4, 1].set_ylim(-3.5,3.5)
-            axs[5, 1].set_ylim(-3.5,3.5)
-            axs[3, 3].set_ylim(-3.5,3.5)
-            axs[4, 3].set_ylim(-3.5,3.5)
-            axs[5, 3].set_ylim(-3.5,3.5)
+            axs[3, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[4, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[5, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[3, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[4, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[5, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
         if sol =='h2':
-            axs[3, 1].set_ylim(-3.5,3.5)
-            axs[4, 1].set_ylim(-3.5,3.5)
-            axs[5, 1].set_ylim(-3.5,3.5)
-            axs[3, 3].set_ylim(-3.5,3.5)
-            axs[4, 3].set_ylim(-3.5,3.5)
-            axs[5, 3].set_ylim(-3.5,3.5)
+            axs[3, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[4, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[5, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[3, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[4, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[5, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
 
+        tikzplotlib.clean_figure(target_resolution=10, scale_precision=1.0)
         tikzplotlib.save('./tikz/' + sol + '.tex')
         plt.savefig('./png/' + sol + '.png')
-        # plt.show()
+        plt.show()
 
 
 if __name__ == '__main__':
