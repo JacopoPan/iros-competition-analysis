@@ -61,6 +61,9 @@ def run(
         resampled_real_x = [[] for i in range(num_files)]
         resampled_real_y = [[] for i in range(num_files)]
         resampled_real_z = [[] for i in range(num_files)]
+        resampled_real_r = [[] for i in range(num_files)]
+        resampled_real_p = [[] for i in range(num_files)]
+        resampled_real_j = [[] for i in range(num_files)]
 
         se_x = 0
         se_y = 0
@@ -73,6 +76,10 @@ def run(
 
         for num in range(1,num_files+1):
             idx = num-1
+
+            ############################
+            ############################
+            ############################
 
             # real cmd
             first_cmd_time = None
@@ -159,6 +166,10 @@ def run(
                 for i, row in enumerate(csv_reader):
                     sim_j[idx].append(float(row[1]))
 
+            ############################
+            ############################
+            ############################
+
             # math magic
             initial_skip[idx] = 0
             for val in sim_time[idx]:
@@ -184,6 +195,10 @@ def run(
             resampled_real_y[idx] = real_y_func(t_new[idx])
             real_z_func = interp1d(np.array(real_time[idx]), np.array(real_z[idx]), kind='linear')
             resampled_real_z[idx] = real_z_func(t_new[idx])
+
+            ############################
+            ############################
+            ############################
 
             # plot one-by-one
             axs[0, 0].plot(real_ref_time[idx], real_ref_x[idx], label='ref')
@@ -219,6 +234,17 @@ def run(
             axs[3, 1].plot(real_time[idx], real_euler1, label='exp')
             axs[4, 1].plot(real_time[idx], real_euler2, label='exp')
             axs[5, 1].plot(real_time[idx], real_euler3, label='exp')
+            #
+            real_r_func = interp1d(np.array(real_time[idx]), np.array(real_euler1), kind='linear')
+            resampled_real_r[idx] = real_r_func(t_new[idx])
+            real_p_func = interp1d(np.array(real_time[idx]), np.array(real_euler2), kind='linear')
+            resampled_real_p[idx] = real_p_func(t_new[idx])
+            real_j_func = interp1d(np.array(real_time[idx]), np.array(real_euler3), kind='linear')
+            resampled_real_j[idx] = real_j_func(t_new[idx])
+            #
+            axs[3, 1].plot(t_new[idx], resampled_real_r[idx], label='exp')
+            axs[4, 1].plot(t_new[idx], resampled_real_p[idx], label='exp')
+            axs[5, 1].plot(t_new[idx], resampled_real_j[idx], label='exp')
 
             axs[0, 2].plot(sim_time[idx], sim_ref_x[idx], label='ref')
             axs[1, 2].plot(sim_time[idx], sim_ref_y[idx], label='ref')
@@ -246,9 +272,17 @@ def run(
             axs[1, 4].plot(t_new[idx], (sim_y[idx][initial_skip[idx]:]-resampled_real_y[idx])**2, label='diff')
             axs[2, 4].plot(t_new[idx], (sim_z[idx][initial_skip[idx]:]-resampled_real_z[idx])**2, label='diff')
 
+            axs[3, 4].plot(t_new[idx], (sim_r[idx][initial_skip[idx]:]-resampled_real_r[idx])**2, label='diff')
+            axs[4, 4].plot(t_new[idx], (sim_p[idx][initial_skip[idx]:]-resampled_real_p[idx])**2, label='diff')
+            axs[5, 4].plot(t_new[idx], (sim_j[idx][initial_skip[idx]:]-resampled_real_j[idx])**2, label='diff')
+
             axs[0, 5].plot(t_new[idx], (sim_ref_x[idx][initial_skip[idx]:]-resampled_real_ref_x[idx])**2, label='diff')
             axs[1, 5].plot(t_new[idx], (sim_ref_y[idx][initial_skip[idx]:]-resampled_real_ref_y[idx])**2, label='diff')
             axs[2, 5].plot(t_new[idx], (sim_ref_z[idx][initial_skip[idx]:]-resampled_real_ref_z[idx])**2, label='diff')
+
+            ############################
+            ############################
+            ############################
 
         latest_start = -1
         earliest_end = 9000
@@ -269,6 +303,13 @@ def run(
         cropped_sim_y = np.zeros((num_files, int((earliest_end-latest_start)*30)))
         cropped_real_z = np.zeros((num_files, int((earliest_end-latest_start)*30)))
         cropped_sim_z = np.zeros((num_files, int((earliest_end-latest_start)*30)))
+        #
+        cropped_real_r = np.zeros((num_files, int((earliest_end-latest_start)*30)))
+        cropped_sim_r = np.zeros((num_files, int((earliest_end-latest_start)*30)))
+        cropped_real_p = np.zeros((num_files, int((earliest_end-latest_start)*30)))
+        cropped_sim_p = np.zeros((num_files, int((earliest_end-latest_start)*30)))
+        cropped_real_j = np.zeros((num_files, int((earliest_end-latest_start)*30)))
+        cropped_sim_j = np.zeros((num_files, int((earliest_end-latest_start)*30)))
 
         for i in range(num_files):
             if sol == 'eku' and i == 1:
@@ -282,6 +323,13 @@ def run(
                     cropped_sim_y[i][insert_idx] = sim_y[i][j]
                     cropped_real_z[i][insert_idx] = resampled_real_z[i][j]
                     cropped_sim_z[i][insert_idx] = sim_z[i][j]
+                    #
+                    cropped_real_r[i][insert_idx] = resampled_real_r[i][j]
+                    cropped_sim_r[i][insert_idx] = sim_r[i][j]
+                    cropped_real_p[i][insert_idx] = resampled_real_p[i][j]
+                    cropped_sim_p[i][insert_idx] = sim_p[i][j]
+                    cropped_real_j[i][insert_idx] = resampled_real_j[i][j]
+                    cropped_sim_j[i][insert_idx] = sim_j[i][j]
                     insert_idx += 1
                     if insert_idx == cropped_real_x.shape[1]:
                         break
@@ -295,12 +343,26 @@ def run(
         avg_real_z = np.average(cropped_real_z, axis=0)
         avg_sim_z = np.average(cropped_sim_z, axis=0)
         avg_rmse_z = np.sqrt(np.sum((avg_real_z-avg_sim_z)**2)/len(avg_real_z))
-        print(f'avg_rmse {avg_rmse_x:.2f} {avg_rmse_y:.2f} {avg_rmse_z:.2f}')
+        #
+        avg_real_r = np.average(cropped_real_r, axis=0)
+        avg_sim_r = np.average(cropped_sim_r, axis=0)
+        avg_rmse_r = np.sqrt(np.sum((avg_real_r-avg_sim_r)**2)/len(avg_real_r))
+        avg_real_p = np.average(cropped_real_p, axis=0)
+        avg_sim_p = np.average(cropped_sim_p, axis=0)
+        avg_rmse_p = np.sqrt(np.sum((avg_real_p-avg_sim_p)**2)/len(avg_real_p))
+        avg_real_j = np.average(cropped_real_j, axis=0)
+        avg_sim_j = np.average(cropped_sim_j, axis=0)
+        avg_rmse_j = np.sqrt(np.sum((avg_real_j-avg_sim_j)**2)/len(avg_real_j))
+        print(f'avg_rmse_xyz {avg_rmse_x:.2f} {avg_rmse_y:.2f} {avg_rmse_z:.2f}')
+        print(f'avg_rmse_rpj {avg_rmse_r:.2f} {avg_rmse_p:.2f} {avg_rmse_j:.2f}')
 
         cropped_time = np.linspace(latest_start, earliest_end, cropped_real_x.shape[1])
         axs[0, 4].plot(cropped_time, (avg_real_x-avg_sim_x)**2, label='diff')
         axs[1, 4].plot(cropped_time, (avg_real_y-avg_sim_y)**2, label='diff')
         axs[2, 4].plot(cropped_time, (avg_real_z-avg_sim_z)**2, label='diff')
+        axs[3, 4].plot(cropped_time, (avg_real_r-avg_sim_r)**2, label='diff')
+        axs[4, 4].plot(cropped_time, (avg_real_p-avg_sim_p)**2, label='diff')
+        axs[5, 4].plot(cropped_time, (avg_real_j-avg_sim_j)**2, label='diff')
 
         # mse_ref_x = se_ref_x/se_ref_count
         # rmse_ref_x = np.sqrt(mse_ref_x)
@@ -312,16 +374,13 @@ def run(
         # real_cmd_freq =  1/avg_real_cmd_timestep
         # print(f'rmse_ref_xyz ({rmse_ref_x:.2f} {rmse_ref_y:.2f} {rmse_ref_z:.2f}) real_cmd_freq {real_cmd_freq:.2f}')
 
-        mse_x = se_x/se_count
-        rmse_x = np.sqrt(mse_x)
-        mse_y = se_y/se_count
-        rmse_y = np.sqrt(mse_y)
-        mse_z = se_z/se_count
-        rmse_z = np.sqrt(mse_z)
+        # rmse_x = np.sqrt(se_x/se_count)
+        # rmse_y = np.sqrt(se_y/se_count)
+        # rmse_z = np.sqrt(se_z/se_count)
 
         # labels
         # fig.suptitle(f'{sol}, rmse_xyz ({rmse_x:.2f} {rmse_y:.2f} {rmse_z:.2f})')
-        fig.suptitle(f'{sol}, avg_rmse_xyz {avg_rmse_x:.2f} {avg_rmse_y:.2f} {avg_rmse_z:.2f}')
+        fig.suptitle(f'{sol}, avg_rmse xyz {avg_rmse_x:.2f} {avg_rmse_y:.2f} {avg_rmse_z:.2f} rpj  {avg_rmse_r:.2f} {avg_rmse_p:.2f} {avg_rmse_j:.2f}')
         axs[5, 0].set_xlabel('time')
         axs[5, 1].set_xlabel('time')
         axs[5, 2].set_xlabel('time')
@@ -373,6 +432,9 @@ def run(
             axs[3, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
             axs[4, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
             axs[5, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[3, 4].set_ylim(0,1.25*y_axis_range)
+            axs[4, 4].set_ylim(0,1.25*y_axis_range)
+            axs[5, 4].set_ylim(0,3*y_axis_range)
         elif sol =='eku':
             axs[3, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
             axs[4, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
@@ -380,6 +442,9 @@ def run(
             axs[3, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
             axs[4, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
             axs[5, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[3, 4].set_ylim(0,1.25*y_axis_range)
+            axs[4, 4].set_ylim(0,1.25*y_axis_range)
+            axs[5, 4].set_ylim(0,1.25*y_axis_range)
         if sol =='h2':
             axs[3, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
             axs[4, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
@@ -387,6 +452,9 @@ def run(
             axs[3, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
             axs[4, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
             axs[5, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[3, 4].set_ylim(0,1.25*y_axis_range)
+            axs[4, 4].set_ylim(0,1.25*y_axis_range)
+            axs[5, 4].set_ylim(0,5.5*y_axis_range)
 
         tikzplotlib.clean_figure(target_resolution=10, scale_precision=1.0)
         tikzplotlib.save('./tikz/' + sol + '.tex')
