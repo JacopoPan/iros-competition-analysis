@@ -23,11 +23,13 @@ import tikzplotlib
 def run(
         paper=False,
     ):
+    sol_num = -1
+    if paper:
+        fig, axs = plt.subplots(3, 9)
     for sol in ['arg', 'eku', 'h2']:
+        sol_num += 1
         if not paper:
             fig, axs = plt.subplots(6, 6)
-        else:
-            fig, axs = plt.subplots(3, 3)
         num_files = 10
 
         real_ref_time = [[] for i in range(num_files)]
@@ -217,9 +219,9 @@ def run(
             avg_real_cmd_timestep += avg_time
 
             if paper:
-                axs[0, 0].plot(real_time[idx], real_x[idx], label='exp')
-                axs[1, 0].plot(real_time[idx], real_y[idx], label='exp')
-                axs[2, 0].plot(real_time[idx], real_z[idx], label='exp')
+                axs[0, 0+3*sol_num].plot(real_time[idx], real_x[idx], label='exp')
+                axs[1, 0+3*sol_num].plot(real_time[idx], real_y[idx], label='exp')
+                axs[2, 0+3*sol_num].plot(real_time[idx], real_z[idx], label='exp')
             else:
                 axs[0, 1].plot(real_time[idx], real_x[idx], label='exp')
                 axs[1, 1].plot(real_time[idx], real_y[idx], label='exp')
@@ -262,9 +264,9 @@ def run(
                 axs[2, 2].plot(sim_time[idx], sim_ref_z[idx], label='ref')  
 
             if paper:
-                axs[0, 1].plot(sim_time[idx], sim_x[idx], label='sim')
-                axs[1, 1].plot(sim_time[idx], sim_y[idx], label='sim')
-                axs[2, 1].plot(sim_time[idx], sim_z[idx], label='sim')
+                axs[0, 1+3*sol_num].plot(sim_time[idx], sim_x[idx], label='sim')
+                axs[1, 1+3*sol_num].plot(sim_time[idx], sim_y[idx], label='sim')
+                axs[2, 1+3*sol_num].plot(sim_time[idx], sim_z[idx], label='sim')
             else:
                 axs[0, 3].plot(sim_time[idx], sim_x[idx], label='sim')
                 axs[1, 3].plot(sim_time[idx], sim_y[idx], label='sim')
@@ -375,9 +377,16 @@ def run(
 
         cropped_time = np.linspace(latest_start, earliest_end, cropped_real_x.shape[1])
         if paper:
-            axs[0, 2].plot(cropped_time, (avg_real_x-avg_sim_x)**2, label='diff')
-            axs[1, 2].plot(cropped_time, (avg_real_y-avg_sim_y)**2, label='diff')
-            axs[2, 2].plot(cropped_time, (avg_real_z-avg_sim_z)**2, label='diff')
+            axs[0, 2+3*sol_num].plot(cropped_time, (avg_real_x-avg_sim_x)**2, label='diff')
+            axs[1, 2+3*sol_num].plot(cropped_time, (avg_real_y-avg_sim_y)**2, label='diff')
+            axs[2, 2+3*sol_num].plot(cropped_time, (avg_real_z-avg_sim_z)**2, label='diff')
+            #
+            axs[0, 2+3*sol_num].plot(cropped_time,  (avg_real_x-avg_sim_x)**2+np.std(cropped_real_x-cropped_sim_x, axis=0), label='diff')
+            axs[0, 2+3*sol_num].plot(cropped_time,  (avg_real_x-avg_sim_x)**2-np.std(cropped_real_x-cropped_sim_x, axis=0), label='diff')
+            axs[1, 2+3*sol_num].plot(cropped_time,  (avg_real_y-avg_sim_y)**2+np.std(cropped_real_y-cropped_sim_y, axis=0), label='diff')
+            axs[1, 2+3*sol_num].plot(cropped_time,  (avg_real_y-avg_sim_y)**2-np.std(cropped_real_y-cropped_sim_y, axis=0), label='diff')
+            axs[2, 2+3*sol_num].plot(cropped_time,  (avg_real_z-avg_sim_z)**2+np.std(cropped_real_z-cropped_sim_z, axis=0), label='diff')
+            axs[2, 2+3*sol_num].plot(cropped_time,  (avg_real_z-avg_sim_z)**2-np.std(cropped_real_z-cropped_sim_z, axis=0), label='diff')
         else:
             axs[0, 4].plot(cropped_time, (avg_real_x-avg_sim_x)**2, label='diff')
             axs[1, 4].plot(cropped_time, (avg_real_y-avg_sim_y)**2, label='diff')
@@ -403,8 +412,8 @@ def run(
 
         # labels
         # fig.suptitle(f'{sol}, rmse_xyz ({rmse_x:.2f} {rmse_y:.2f} {rmse_z:.2f})')
-        fig.suptitle(f'{sol}, avg rmse xyz {avg_rmse_x:.2f} {avg_rmse_y:.2f} {avg_rmse_z:.2f} rpj  {avg_rmse_r:.2f} {avg_rmse_p:.2f} {avg_rmse_j:.2f}')
         if not paper:
+            fig.suptitle(f'{sol}, avg rmse xyz {avg_rmse_x:.2f} {avg_rmse_y:.2f} {avg_rmse_z:.2f} rpj  {avg_rmse_r:.2f} {avg_rmse_p:.2f} {avg_rmse_j:.2f}')
             axs[5, 0].set_xlabel('time')
             axs[5, 1].set_xlabel('time')
             axs[5, 2].set_xlabel('time')
@@ -480,9 +489,23 @@ def run(
                 axs[4, 4].set_ylim(0,1.25*y_axis_range)
                 axs[5, 4].set_ylim(0,5.5*y_axis_range)
 
-        tikzplotlib.clean_figure(target_resolution=10, scale_precision=1.0)
-        tikzplotlib.save('./tikz/' + sol + '.tex')
-        plt.savefig('./png/' + sol + '.png')
+        if not paper:
+            tikzplotlib.clean_figure(target_resolution=10, scale_precision=1.0)
+            tikzplotlib.save('./tikz/' + sol + '.tex')
+            plt.savefig('./png/' + sol + '.png')
+            plt.show()
+    
+    if paper:
+        for col in [0, 1, 3, 4, 6, 7]:
+            for row in range(3):
+                axs[row, col].set_ylim(-3.5,3.5)
+        for col in [2, 5, 8]:
+            for row in range(3):
+                axs[row, col].set_ylim(-2,6)
+            
+        tikzplotlib.clean_figure(target_resolution=50, scale_precision=1.0)
+        tikzplotlib.save('./tikz/all.tex')
+        plt.savefig('./png/all.png')
         plt.show()
 
 
