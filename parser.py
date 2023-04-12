@@ -5,7 +5,7 @@ Notes:
 
 Run as:
 
-    $ python3 parser.py --test_arg <test_arg>
+    $ python3 parser.py --paper
 
 """
 import argparse
@@ -21,10 +21,13 @@ import tikzplotlib
 
 
 def run(
-        test_arg,
+        paper=False,
     ):
     for sol in ['arg', 'eku', 'h2']:
-        fig, axs = plt.subplots(6, 6)
+        if not paper:
+            fig, axs = plt.subplots(6, 6)
+        else:
+            fig, axs = plt.subplots(3, 3)
         num_files = 10
 
         real_ref_time = [[] for i in range(num_files)]
@@ -201,24 +204,30 @@ def run(
             ############################
 
             # plot one-by-one
-            axs[0, 0].plot(real_ref_time[idx], real_ref_x[idx], label='ref')
-            axs[1, 0].plot(real_ref_time[idx], real_ref_y[idx], label='ref')
-            axs[2, 0].plot(real_ref_time[idx], real_ref_z[idx], label='ref')
+            if not paper:
+                axs[0, 0].plot(real_ref_time[idx], real_ref_x[idx], label='ref')
+                axs[1, 0].plot(real_ref_time[idx], real_ref_y[idx], label='ref')
+                axs[2, 0].plot(real_ref_time[idx], real_ref_z[idx], label='ref')
             #
-            axs[0, 0].plot(t_new[idx], resampled_real_ref_x[idx], label='ref')
-            axs[1, 0].plot(t_new[idx], resampled_real_ref_y[idx], label='ref')
-            axs[2, 0].plot(t_new[idx], resampled_real_ref_z[idx], label='ref')
+                axs[0, 0].plot(t_new[idx], resampled_real_ref_x[idx], label='ref')
+                axs[1, 0].plot(t_new[idx], resampled_real_ref_y[idx], label='ref')
+                axs[2, 0].plot(t_new[idx], resampled_real_ref_z[idx], label='ref')
 
             avg_time = (real_ref_time[idx][-1] - real_ref_time[idx][0]) / (len(real_ref_time[idx])-1)
             avg_real_cmd_timestep += avg_time
 
-            axs[0, 1].plot(real_time[idx], real_x[idx], label='exp')
-            axs[1, 1].plot(real_time[idx], real_y[idx], label='exp')
-            axs[2, 1].plot(real_time[idx], real_z[idx], label='exp')
-            #
-            axs[0, 1].plot(t_new[idx], resampled_real_x[idx], label='exp')
-            axs[1, 1].plot(t_new[idx], resampled_real_y[idx], label='exp')
-            axs[2, 1].plot(t_new[idx], resampled_real_z[idx], label='exp')
+            if paper:
+                axs[0, 0].plot(real_time[idx], real_x[idx], label='exp')
+                axs[1, 0].plot(real_time[idx], real_y[idx], label='exp')
+                axs[2, 0].plot(real_time[idx], real_z[idx], label='exp')
+            else:
+                axs[0, 1].plot(real_time[idx], real_x[idx], label='exp')
+                axs[1, 1].plot(real_time[idx], real_y[idx], label='exp')
+                axs[2, 1].plot(real_time[idx], real_z[idx], label='exp')
+                #
+                axs[0, 1].plot(t_new[idx], resampled_real_x[idx], label='exp')
+                axs[1, 1].plot(t_new[idx], resampled_real_y[idx], label='exp')
+                axs[2, 1].plot(t_new[idx], resampled_real_z[idx], label='exp')
             #
             real_euler1 = []
             real_euler2 = []
@@ -231,9 +240,10 @@ def run(
                 # getEulerFromQuaternion returns a list of 3 floating point values, a vec3. 
                 # The rotation order is first roll around X, then pitch around Y and finally yaw around Z, 
                 # as in the ROS URDF rpy convention.
-            axs[3, 1].plot(real_time[idx], real_euler1, label='exp')
-            axs[4, 1].plot(real_time[idx], real_euler2, label='exp')
-            axs[5, 1].plot(real_time[idx], real_euler3, label='exp')
+            if not paper:
+                axs[3, 1].plot(real_time[idx], real_euler1, label='exp')
+                axs[4, 1].plot(real_time[idx], real_euler2, label='exp')
+                axs[5, 1].plot(real_time[idx], real_euler3, label='exp')
             #
             real_r_func = interp1d(np.array(real_time[idx]), np.array(real_euler1), kind='linear')
             resampled_real_r[idx] = real_r_func(t_new[idx])
@@ -242,21 +252,27 @@ def run(
             real_j_func = interp1d(np.array(real_time[idx]), np.array(real_euler3), kind='linear')
             resampled_real_j[idx] = real_j_func(t_new[idx])
             #
-            axs[3, 1].plot(t_new[idx], resampled_real_r[idx], label='exp')
-            axs[4, 1].plot(t_new[idx], resampled_real_p[idx], label='exp')
-            axs[5, 1].plot(t_new[idx], resampled_real_j[idx], label='exp')
+            if not paper:
+                axs[3, 1].plot(t_new[idx], resampled_real_r[idx], label='exp')
+                axs[4, 1].plot(t_new[idx], resampled_real_p[idx], label='exp')
+                axs[5, 1].plot(t_new[idx], resampled_real_j[idx], label='exp')
 
-            axs[0, 2].plot(sim_time[idx], sim_ref_x[idx], label='ref')
-            axs[1, 2].plot(sim_time[idx], sim_ref_y[idx], label='ref')
-            axs[2, 2].plot(sim_time[idx], sim_ref_z[idx], label='ref')  
+                axs[0, 2].plot(sim_time[idx], sim_ref_x[idx], label='ref')
+                axs[1, 2].plot(sim_time[idx], sim_ref_y[idx], label='ref')
+                axs[2, 2].plot(sim_time[idx], sim_ref_z[idx], label='ref')  
 
-            axs[0, 3].plot(sim_time[idx], sim_x[idx], label='sim')
-            axs[1, 3].plot(sim_time[idx], sim_y[idx], label='sim')
-            axs[2, 3].plot(sim_time[idx], sim_z[idx], label='sim')
-            #
-            axs[3, 3].plot(sim_time[idx], sim_r[idx], label='sim')
-            axs[4, 3].plot(sim_time[idx], sim_p[idx], label='sim')
-            axs[5, 3].plot(sim_time[idx], sim_j[idx], label='sim')
+            if paper:
+                axs[0, 1].plot(sim_time[idx], sim_x[idx], label='sim')
+                axs[1, 1].plot(sim_time[idx], sim_y[idx], label='sim')
+                axs[2, 1].plot(sim_time[idx], sim_z[idx], label='sim')
+            else:
+                axs[0, 3].plot(sim_time[idx], sim_x[idx], label='sim')
+                axs[1, 3].plot(sim_time[idx], sim_y[idx], label='sim')
+                axs[2, 3].plot(sim_time[idx], sim_z[idx], label='sim')
+                #
+                axs[3, 3].plot(sim_time[idx], sim_r[idx], label='sim')
+                axs[4, 3].plot(sim_time[idx], sim_p[idx], label='sim')
+                axs[5, 3].plot(sim_time[idx], sim_j[idx], label='sim')
 
             se_x += np.sum((resampled_real_x[idx] - np.array(sim_x[idx][initial_skip[idx]:]))**2)
             se_y += np.sum((resampled_real_y[idx] - np.array(sim_y[idx][initial_skip[idx]:]))**2)
@@ -268,17 +284,18 @@ def run(
             se_ref_y += np.sum((resampled_real_ref_z[idx] - np.array(sim_ref_z[idx][initial_skip[idx]:]))**2)
             se_ref_count += len(resampled_real_ref_x[idx])
 
-            axs[0, 4].plot(t_new[idx], (sim_x[idx][initial_skip[idx]:]-resampled_real_x[idx])**2, label='diff')
-            axs[1, 4].plot(t_new[idx], (sim_y[idx][initial_skip[idx]:]-resampled_real_y[idx])**2, label='diff')
-            axs[2, 4].plot(t_new[idx], (sim_z[idx][initial_skip[idx]:]-resampled_real_z[idx])**2, label='diff')
+            if not paper:
+                axs[0, 4].plot(t_new[idx], (sim_x[idx][initial_skip[idx]:]-resampled_real_x[idx])**2, label='diff')
+                axs[1, 4].plot(t_new[idx], (sim_y[idx][initial_skip[idx]:]-resampled_real_y[idx])**2, label='diff')
+                axs[2, 4].plot(t_new[idx], (sim_z[idx][initial_skip[idx]:]-resampled_real_z[idx])**2, label='diff')
 
-            axs[3, 4].plot(t_new[idx], (sim_r[idx][initial_skip[idx]:]-resampled_real_r[idx])**2, label='diff')
-            axs[4, 4].plot(t_new[idx], (sim_p[idx][initial_skip[idx]:]-resampled_real_p[idx])**2, label='diff')
-            axs[5, 4].plot(t_new[idx], (sim_j[idx][initial_skip[idx]:]-resampled_real_j[idx])**2, label='diff')
+                axs[3, 4].plot(t_new[idx], (sim_r[idx][initial_skip[idx]:]-resampled_real_r[idx])**2, label='diff')
+                axs[4, 4].plot(t_new[idx], (sim_p[idx][initial_skip[idx]:]-resampled_real_p[idx])**2, label='diff')
+                axs[5, 4].plot(t_new[idx], (sim_j[idx][initial_skip[idx]:]-resampled_real_j[idx])**2, label='diff')
 
-            axs[0, 5].plot(t_new[idx], (sim_ref_x[idx][initial_skip[idx]:]-resampled_real_ref_x[idx])**2, label='diff')
-            axs[1, 5].plot(t_new[idx], (sim_ref_y[idx][initial_skip[idx]:]-resampled_real_ref_y[idx])**2, label='diff')
-            axs[2, 5].plot(t_new[idx], (sim_ref_z[idx][initial_skip[idx]:]-resampled_real_ref_z[idx])**2, label='diff')
+                axs[0, 5].plot(t_new[idx], (sim_ref_x[idx][initial_skip[idx]:]-resampled_real_ref_x[idx])**2, label='diff')
+                axs[1, 5].plot(t_new[idx], (sim_ref_y[idx][initial_skip[idx]:]-resampled_real_ref_y[idx])**2, label='diff')
+                axs[2, 5].plot(t_new[idx], (sim_ref_z[idx][initial_skip[idx]:]-resampled_real_ref_z[idx])**2, label='diff')
 
             ############################
             ############################
@@ -357,12 +374,18 @@ def run(
         print(f'avg_rmse_rpj {avg_rmse_r:.2f} {avg_rmse_p:.2f} {avg_rmse_j:.2f}')
 
         cropped_time = np.linspace(latest_start, earliest_end, cropped_real_x.shape[1])
-        axs[0, 4].plot(cropped_time, (avg_real_x-avg_sim_x)**2, label='diff')
-        axs[1, 4].plot(cropped_time, (avg_real_y-avg_sim_y)**2, label='diff')
-        axs[2, 4].plot(cropped_time, (avg_real_z-avg_sim_z)**2, label='diff')
-        axs[3, 4].plot(cropped_time, (avg_real_r-avg_sim_r)**2, label='diff')
-        axs[4, 4].plot(cropped_time, (avg_real_p-avg_sim_p)**2, label='diff')
-        axs[5, 4].plot(cropped_time, (avg_real_j-avg_sim_j)**2, label='diff')
+        if paper:
+            axs[0, 2].plot(cropped_time, (avg_real_x-avg_sim_x)**2, label='diff')
+            axs[1, 2].plot(cropped_time, (avg_real_y-avg_sim_y)**2, label='diff')
+            axs[2, 2].plot(cropped_time, (avg_real_z-avg_sim_z)**2, label='diff')
+        else:
+            axs[0, 4].plot(cropped_time, (avg_real_x-avg_sim_x)**2, label='diff')
+            axs[1, 4].plot(cropped_time, (avg_real_y-avg_sim_y)**2, label='diff')
+            axs[2, 4].plot(cropped_time, (avg_real_z-avg_sim_z)**2, label='diff')
+            #
+            axs[3, 4].plot(cropped_time, (avg_real_r-avg_sim_r)**2, label='diff')
+            axs[4, 4].plot(cropped_time, (avg_real_p-avg_sim_p)**2, label='diff')
+            axs[5, 4].plot(cropped_time, (avg_real_j-avg_sim_j)**2, label='diff')
 
         # mse_ref_x = se_ref_x/se_ref_count
         # rmse_ref_x = np.sqrt(mse_ref_x)
@@ -380,81 +403,82 @@ def run(
 
         # labels
         # fig.suptitle(f'{sol}, rmse_xyz ({rmse_x:.2f} {rmse_y:.2f} {rmse_z:.2f})')
-        fig.suptitle(f'{sol}, avg_rmse xyz {avg_rmse_x:.2f} {avg_rmse_y:.2f} {avg_rmse_z:.2f} rpj  {avg_rmse_r:.2f} {avg_rmse_p:.2f} {avg_rmse_j:.2f}')
-        axs[5, 0].set_xlabel('time')
-        axs[5, 1].set_xlabel('time')
-        axs[5, 2].set_xlabel('time')
-        axs[5, 3].set_xlabel('time')
-        axs[5, 4].set_xlabel('time')
-        axs[5, 5].set_xlabel('time')
+        fig.suptitle(f'{sol}, avg rmse xyz {avg_rmse_x:.2f} {avg_rmse_y:.2f} {avg_rmse_z:.2f} rpj  {avg_rmse_r:.2f} {avg_rmse_p:.2f} {avg_rmse_j:.2f}')
+        if not paper:
+            axs[5, 0].set_xlabel('time')
+            axs[5, 1].set_xlabel('time')
+            axs[5, 2].set_xlabel('time')
+            axs[5, 3].set_xlabel('time')
+            axs[5, 4].set_xlabel('time')
+            axs[5, 5].set_xlabel('time')
 
-        axs[0, 0].set_ylabel('x')
-        axs[1, 0].set_ylabel('y')
-        axs[2, 0].set_ylabel('z')
-        axs[3, 0].set_ylabel('r')
-        axs[4, 0].set_ylabel('p')
-        axs[5, 0].set_ylabel('j')
+            axs[0, 0].set_ylabel('x')
+            axs[1, 0].set_ylabel('y')
+            axs[2, 0].set_ylabel('z')
+            axs[3, 0].set_ylabel('r')
+            axs[4, 0].set_ylabel('p')
+            axs[5, 0].set_ylabel('j')
 
-        axs[0, 0].set_title('real_cmd')
-        axs[0, 1].set_title('real')
-        axs[0, 2].set_title('sim_cmd')
-        axs[0, 3].set_title('sim')
-        axs[0, 4].set_title('sq_diff')
-        axs[0, 5].set_title('cmd_sq_diff')
+            axs[0, 0].set_title('real_cmd')
+            axs[0, 1].set_title('real')
+            axs[0, 2].set_title('sim_cmd')
+            axs[0, 3].set_title('sim')
+            axs[0, 4].set_title('sq_diff')
+            axs[0, 5].set_title('cmd_sq_diff')
 
-        # axes limits
-        y_axis_range = 7
-        axs[0, 0].set_ylim(-y_axis_range/2,y_axis_range/2)
-        axs[0, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
-        axs[0, 2].set_ylim(-y_axis_range/2,y_axis_range/2)
-        axs[0, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
-        axs[0, 4].set_ylim(0,1.25*y_axis_range)
-        axs[0, 5].set_ylim(0,1.25*y_axis_range)
+            # axes limits
+            y_axis_range = 7
+            axs[0, 0].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[0, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[0, 2].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[0, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[0, 4].set_ylim(0,1.25*y_axis_range)
+            axs[0, 5].set_ylim(0,1.25*y_axis_range)
 
-        axs[1, 0].set_ylim(-y_axis_range/2,y_axis_range/2)
-        axs[1, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
-        axs[1, 2].set_ylim(-y_axis_range/2,y_axis_range/2)
-        axs[1, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
-        axs[1, 4].set_ylim(0,1.25*y_axis_range)
-        axs[1, 5].set_ylim(0,1.25*y_axis_range)
+            axs[1, 0].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[1, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[1, 2].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[1, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[1, 4].set_ylim(0,1.25*y_axis_range)
+            axs[1, 5].set_ylim(0,1.25*y_axis_range)
 
-        axs[2, 0].set_ylim(-y_axis_range/2,y_axis_range/2)
-        axs[2, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
-        axs[2, 2].set_ylim(-y_axis_range/2,y_axis_range/2)
-        axs[2, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
-        axs[2, 4].set_ylim(0,1.25*y_axis_range)
-        axs[2, 5].set_ylim(0,1.25*y_axis_range)
+            axs[2, 0].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[2, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[2, 2].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[2, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+            axs[2, 4].set_ylim(0,1.25*y_axis_range)
+            axs[2, 5].set_ylim(0,1.25*y_axis_range)
 
-        if sol =='arg':
-            axs[3, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[4, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[5, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[3, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[4, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[5, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[3, 4].set_ylim(0,1.25*y_axis_range)
-            axs[4, 4].set_ylim(0,1.25*y_axis_range)
-            axs[5, 4].set_ylim(0,3*y_axis_range)
-        elif sol =='eku':
-            axs[3, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[4, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[5, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[3, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[4, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[5, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[3, 4].set_ylim(0,1.25*y_axis_range)
-            axs[4, 4].set_ylim(0,1.25*y_axis_range)
-            axs[5, 4].set_ylim(0,1.25*y_axis_range)
-        if sol =='h2':
-            axs[3, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[4, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[5, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[3, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[4, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[5, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
-            axs[3, 4].set_ylim(0,1.25*y_axis_range)
-            axs[4, 4].set_ylim(0,1.25*y_axis_range)
-            axs[5, 4].set_ylim(0,5.5*y_axis_range)
+            if sol =='arg':
+                axs[3, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[4, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[5, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[3, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[4, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[5, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[3, 4].set_ylim(0,1.25*y_axis_range)
+                axs[4, 4].set_ylim(0,1.25*y_axis_range)
+                axs[5, 4].set_ylim(0,3*y_axis_range)
+            elif sol =='eku':
+                axs[3, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[4, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[5, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[3, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[4, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[5, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[3, 4].set_ylim(0,1.25*y_axis_range)
+                axs[4, 4].set_ylim(0,1.25*y_axis_range)
+                axs[5, 4].set_ylim(0,1.25*y_axis_range)
+            if sol =='h2':
+                axs[3, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[4, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[5, 1].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[3, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[4, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[5, 3].set_ylim(-y_axis_range/2,y_axis_range/2)
+                axs[3, 4].set_ylim(0,1.25*y_axis_range)
+                axs[4, 4].set_ylim(0,1.25*y_axis_range)
+                axs[5, 4].set_ylim(0,5.5*y_axis_range)
 
         tikzplotlib.clean_figure(target_resolution=10, scale_precision=1.0)
         tikzplotlib.save('./tikz/' + sol + '.tex')
@@ -464,9 +488,9 @@ def run(
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parsing script')
-    parser.add_argument('--test_arg',
-                        default='',
-                        type=str,
-                        help='Test argument', metavar='')
+    parser.add_argument('--paper',
+                        action='store_true',
+                        help='Test argument', 
+                        )
     ARGS = parser.parse_args()
     run(**vars(ARGS))
