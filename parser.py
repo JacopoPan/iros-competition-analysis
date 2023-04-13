@@ -496,6 +496,17 @@ def run(
             plt.show()
     
     if paper:
+        axs[0, 0].set_ylabel('x')
+        axs[0, 1].set_ylabel('y')
+        axs[0, 2].set_ylabel('z')
+        axs[0, 0].set_title('real arg')
+        axs[0, 3].set_title('real eku')
+        axs[0, 6].set_title('real h2')
+        axs[0, 1].set_title('sim arg')
+        axs[0, 4].set_title('sim eku')
+        axs[0, 7].set_title('sim h2')
+        for col in [2, 5, 8]:
+            axs[0, col].set_title('diff (avg, pm std)')
         for col in [0, 1, 3, 4, 6, 7]:
             for row in range(3):
                 axs[row, col].set_ylim(-3.5,3.5)
