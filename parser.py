@@ -496,9 +496,17 @@ def run(
             plt.show()
     
     if paper:
-        axs[0, 0].set_ylabel('x')
-        axs[0, 1].set_ylabel('y')
-        axs[0, 2].set_ylabel('z')
+        axs[0, 0].set_ylabel('x (m)')
+        axs[1, 0].set_ylabel('y (m)')
+        axs[2, 0].set_ylabel('z (m)')
+        for col in range(9):
+            axs[2, col].set_xlabel('time (s)')
+        for col in range(1,9):
+            for row in range(3):
+                axs[row, col].yaxis.set_ticklabels([])
+        for col in range(9):
+            for row in range(2):
+                axs[row, col].xaxis.set_ticklabels([])
         axs[0, 0].set_title('real arg')
         axs[0, 3].set_title('real eku')
         axs[0, 6].set_title('real h2')
@@ -513,7 +521,16 @@ def run(
         for col in [2, 5, 8]:
             for row in range(3):
                 axs[row, col].set_ylim(-2,6)
-            
+        for col in [0, 1, 2]:
+            for row in range(3):
+                axs[row, col].set_xlim(0,12)
+        for col in [3, 4, 5]:
+            for row in range(3):
+                axs[row, col].set_xlim(0,24)
+        for col in [6, 7, 8]:
+            for row in range(3):
+                axs[row, col].set_xlim(0,12)
+
         tikzplotlib.clean_figure(target_resolution=50, scale_precision=1.0)
         tikzplotlib.save('./tikz/all.tex')
         plt.savefig('./png/all.png')
