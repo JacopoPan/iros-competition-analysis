@@ -29,7 +29,7 @@ def run(
     for sol in ['arg', 'eku', 'h2']:
         sol_num += 1
         if not paper:
-            fig, axs = plt.subplots(6, 6)
+            fig, axs = plt.subplots(16, 6)
         num_files = 10
 
         real_ref_time = [[] for i in range(num_files)]
@@ -44,6 +44,17 @@ def run(
         real_q2 = [[] for i in range(num_files)]
         real_q3 = [[] for i in range(num_files)]
         real_q4 = [[] for i in range(num_files)]
+
+        real_ref_vx = [[] for i in range(num_files)]
+        real_ref_vy = [[] for i in range(num_files)]
+        real_ref_vz = [[] for i in range(num_files)]
+        real_ref_ax = [[] for i in range(num_files)]
+        real_ref_ay = [[] for i in range(num_files)]
+        real_ref_az = [[] for i in range(num_files)]
+        real_ref_yaw = [[] for i in range(num_files)]
+        real_ref_w1 = [[] for i in range(num_files)]
+        real_ref_w2 = [[] for i in range(num_files)]
+        real_ref_w3 = [[] for i in range(num_files)]
         
         sim_time = [[] for i in range(num_files)]
         sim_ref_x = [[] for i in range(num_files)]
@@ -55,6 +66,17 @@ def run(
         sim_r = [[] for i in range(num_files)]
         sim_p = [[] for i in range(num_files)]
         sim_j = [[] for i in range(num_files)]
+
+        sim_ref_vx = [[] for i in range(num_files)]
+        sim_ref_vy = [[] for i in range(num_files)]
+        sim_ref_vz = [[] for i in range(num_files)]
+        sim_ref_ax = [[] for i in range(num_files)]
+        sim_ref_ay = [[] for i in range(num_files)]
+        sim_ref_az = [[] for i in range(num_files)]
+        sim_ref_yaw = [[] for i in range(num_files)]
+        sim_ref_w1 = [[] for i in range(num_files)]
+        sim_ref_w2 = [[] for i in range(num_files)]
+        sim_ref_w3 = [[] for i in range(num_files)]
 
         avg_real_cmd_timestep = 0
 
@@ -102,6 +124,17 @@ def run(
                     real_ref_x[idx].append(float(row[2]))
                     real_ref_y[idx].append(float(row[3]))
                     real_ref_z[idx].append(float(row[4]))
+                    #
+                    real_ref_vx[idx].append(float(row[5]))
+                    real_ref_vy[idx].append(float(row[6]))
+                    real_ref_vz[idx].append(float(row[7]))
+                    real_ref_ax[idx].append(float(row[8]))
+                    real_ref_ay[idx].append(float(row[9]))
+                    real_ref_az[idx].append(float(row[10]))
+                    real_ref_yaw[idx].append(float(row[11]))
+                    real_ref_w1[idx].append(float(row[12]))
+                    real_ref_w2[idx].append(float(row[13]))
+                    real_ref_w3[idx].append(float(row[14]))
                 last_cmd_time = real_ref_time[idx][-1]+real_ref_init_time
 
             # real vicon
@@ -132,6 +165,17 @@ def run(
                     sim_ref_x[idx].append(float(row[2]))
                     sim_ref_y[idx].append(float(row[3]))
                     sim_ref_z[idx].append(float(row[4]))
+                    #
+                    sim_ref_vx[idx].append(float(row[5]))
+                    sim_ref_vy[idx].append(float(row[6]))
+                    sim_ref_vz[idx].append(float(row[7]))
+                    sim_ref_ax[idx].append(float(row[8]))
+                    sim_ref_ay[idx].append(float(row[9]))
+                    sim_ref_az[idx].append(float(row[10]))
+                    sim_ref_yaw[idx].append(float(row[11]))
+                    sim_ref_w1[idx].append(float(row[12]))
+                    sim_ref_w2[idx].append(float(row[13]))
+                    sim_ref_w3[idx].append(float(row[14]))
 
             # sim pos
             folder = './sim/' + sol + '/ep' + str(num)
@@ -214,6 +258,17 @@ def run(
                 axs[0, 0].plot(t_new[idx], resampled_real_ref_x[idx], label='ref')
                 axs[1, 0].plot(t_new[idx], resampled_real_ref_y[idx], label='ref')
                 axs[2, 0].plot(t_new[idx], resampled_real_ref_z[idx], label='ref')
+            #
+                axs[6, 0].plot(real_ref_time[idx], real_ref_vx[idx], label='ref')
+                axs[7, 0].plot(real_ref_time[idx], real_ref_vy[idx], label='ref')
+                axs[8, 0].plot(real_ref_time[idx], real_ref_vz[idx], label='ref')
+                axs[9, 0].plot(real_ref_time[idx], real_ref_ax[idx], label='ref')
+                axs[10, 0].plot(real_ref_time[idx], real_ref_ay[idx], label='ref')
+                axs[11, 0].plot(real_ref_time[idx], real_ref_az[idx], label='ref')
+                axs[12, 0].plot(real_ref_time[idx], real_ref_yaw[idx], label='ref')
+                axs[13, 0].plot(real_ref_time[idx], real_ref_w1[idx], label='ref')
+                axs[14, 0].plot(real_ref_time[idx], real_ref_w2[idx], label='ref')
+                axs[15, 0].plot(real_ref_time[idx], real_ref_w3[idx], label='ref')
 
             avg_time = (real_ref_time[idx][-1] - real_ref_time[idx][0]) / (len(real_ref_time[idx])-1)
             avg_real_cmd_timestep += avg_time
@@ -262,6 +317,17 @@ def run(
                 axs[0, 2].plot(sim_time[idx], sim_ref_x[idx], label='ref')
                 axs[1, 2].plot(sim_time[idx], sim_ref_y[idx], label='ref')
                 axs[2, 2].plot(sim_time[idx], sim_ref_z[idx], label='ref')  
+
+                axs[6, 2].plot(sim_time[idx], sim_ref_vx[idx], label='ref')
+                axs[7, 2].plot(sim_time[idx], sim_ref_vy[idx], label='ref')
+                axs[8, 2].plot(sim_time[idx], sim_ref_vz[idx], label='ref')
+                axs[9, 2].plot(sim_time[idx], sim_ref_ax[idx], label='ref')
+                axs[10, 2].plot(sim_time[idx], sim_ref_ay[idx], label='ref')
+                axs[11, 2].plot(sim_time[idx], sim_ref_az[idx], label='ref')
+                axs[12, 2].plot(sim_time[idx], sim_ref_yaw[idx], label='ref')
+                axs[13, 2].plot(sim_time[idx], sim_ref_w1[idx], label='ref')
+                axs[14, 2].plot(sim_time[idx], sim_ref_w2[idx], label='ref')
+                axs[15, 2].plot(sim_time[idx], sim_ref_w3[idx], label='ref')
 
             if paper:
                 axs[0, 1+3*sol_num].plot(sim_time[idx], sim_x[idx], label='sim')
@@ -427,6 +493,17 @@ def run(
             axs[3, 0].set_ylabel('r')
             axs[4, 0].set_ylabel('p')
             axs[5, 0].set_ylabel('j')
+
+            axs[6, 0].set_ylabel('vx')
+            axs[7, 0].set_ylabel('vy')
+            axs[8, 0].set_ylabel('vz')
+            axs[9, 0].set_ylabel('ax')
+            axs[10, 0].set_ylabel('ay')
+            axs[11, 0].set_ylabel('az')
+            axs[12, 0].set_ylabel('yaw')
+            axs[13, 0].set_ylabel('w1')
+            axs[14, 0].set_ylabel('w2')
+            axs[15, 0].set_ylabel('w3')
 
             axs[0, 0].set_title('real_cmd')
             axs[0, 1].set_title('real')
