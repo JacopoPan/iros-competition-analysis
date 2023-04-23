@@ -5,7 +5,7 @@ Notes:
 
 Run as:
 
-    $ python3 parser.py --paper
+    $ python3 parse.py --paper
 
 """
 import argparse
