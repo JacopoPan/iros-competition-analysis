@@ -717,7 +717,7 @@ def run(
             for row in range(3):
                 axs[row, col].set_xlim(0, 12)
 
-        tikzplotlib.clean_figure(target_resolution=50, scale_precision=1.0)
+        tikzplotlib.clean_figure(target_resolution=300, scale_precision=1.0)
         tikzplotlib.save('./tikz/all.tex')
         plt.savefig('./png/all.png')
         plt.show()
