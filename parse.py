@@ -530,29 +530,29 @@ def run(
             latest_start, earliest_end, cropped_real_x.shape[1])
         if paper:
             axs[0, 2+3*sol_num].plot(cropped_time,
-                                     (avg_real_x-avg_sim_x)**2, label='diff')
+                                     np.sqrt((avg_real_x-avg_sim_x)**2), label='diff')
             axs[1, 2+3*sol_num].plot(cropped_time,
-                                     (avg_real_y-avg_sim_y)**2, label='diff')
+                                     np.sqrt((avg_real_y-avg_sim_y)**2), label='diff')
             axs[2, 2+3*sol_num].plot(cropped_time,
-                                     (avg_real_z-avg_sim_z)**2, label='diff')
+                                     np.sqrt((avg_real_z-avg_sim_z)**2), label='diff')
             #
-            axs[0, 2+3*sol_num].plot(cropped_time,  (avg_real_x-avg_sim_x)
-                                     ** 2+np.std(cropped_real_x-cropped_sim_x, axis=0),
+            axs[0, 2+3*sol_num].plot(cropped_time, np.sqrt((avg_real_x-avg_sim_x)**2)
+                                     +np.std(np.sqrt((cropped_real_x-cropped_sim_x)**2), axis=0),
                                      label='diff')
-            axs[0, 2+3*sol_num].plot(cropped_time,  (avg_real_x-avg_sim_x)
-                                     ** 2-np.std(cropped_real_x-cropped_sim_x, axis=0),
+            axs[0, 2+3*sol_num].plot(cropped_time, np.sqrt((avg_real_x-avg_sim_x)**2)
+                                     -np.std(np.sqrt((cropped_real_x-cropped_sim_x)**2), axis=0),
                                      label='diff')
-            axs[1, 2+3*sol_num].plot(cropped_time,  (avg_real_y-avg_sim_y)
-                                     ** 2+np.std(cropped_real_y-cropped_sim_y, axis=0),
+            axs[1, 2+3*sol_num].plot(cropped_time, np.sqrt((avg_real_y-avg_sim_y)**2)
+                                     +np.std(np.sqrt((cropped_real_y-cropped_sim_y)**2), axis=0),
                                      label='diff')
-            axs[1, 2+3*sol_num].plot(cropped_time,  (avg_real_y-avg_sim_y)
-                                     ** 2-np.std(cropped_real_y-cropped_sim_y, axis=0),
+            axs[1, 2+3*sol_num].plot(cropped_time, np.sqrt((avg_real_y-avg_sim_y)**2)
+                                     -np.std(np.sqrt((cropped_real_y-cropped_sim_y)**2), axis=0),
                                      label='diff')
-            axs[2, 2+3*sol_num].plot(cropped_time,  (avg_real_z-avg_sim_z)
-                                     ** 2+np.std(cropped_real_z-cropped_sim_z, axis=0),
+            axs[2, 2+3*sol_num].plot(cropped_time, np.sqrt((avg_real_z-avg_sim_z)**2)
+                                     +np.std(np.sqrt((cropped_real_z-cropped_sim_z)**2), axis=0),
                                      label='diff')
-            axs[2, 2+3*sol_num].plot(cropped_time,  (avg_real_z-avg_sim_z)
-                                     ** 2-np.std(cropped_real_z-cropped_sim_z, axis=0),
+            axs[2, 2+3*sol_num].plot(cropped_time, np.sqrt((avg_real_z-avg_sim_z)**2)
+                                     -np.std(np.sqrt((cropped_real_z-cropped_sim_z)**2), axis=0),
                                      label='diff')
         else:
             axs[0, 4].plot(cropped_time, (avg_real_x-avg_sim_x)
