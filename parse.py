@@ -6,8 +6,11 @@ Notes:
 Run as:
 
     $ python3 parse.py --paper
+    $ python3 parse.py --aer1217
+    $ python3 parse.py
 
 '''
+import os
 import argparse
 import csv
 import sys
@@ -25,6 +28,7 @@ from scipy.interpolate import interp1d
 
 def run(
     paper=False,
+    aer1217=False,
 ):
     '''Main function.
     '''
@@ -33,7 +37,7 @@ def run(
         fig, axs = plt.subplots(3, 9)
     for sol in ['arg', 'eku', 'h2']:
         sol_num += 1
-        if not paper:
+        if not paper and not aer1217:
             fig, axs = plt.subplots(16, 6)
         num_files = 10
 
@@ -265,7 +269,7 @@ def run(
             ############################
 
             # plot one-by-one
-            if not paper:
+            if not paper and not aer1217:
                 axs[0, 0].plot(real_ref_time[idx],
                                real_ref_x[idx], label='ref')
                 axs[1, 0].plot(real_ref_time[idx],
@@ -312,7 +316,7 @@ def run(
                                          real_y[idx], label='exp')
                 axs[2, 0+3*sol_num].plot(real_time[idx],
                                          real_z[idx], label='exp')
-            else:
+            elif not aer1217:
                 axs[0, 1].plot(real_time[idx], real_x[idx], label='exp')
                 axs[1, 1].plot(real_time[idx], real_y[idx], label='exp')
                 axs[2, 1].plot(real_time[idx], real_z[idx], label='exp')
@@ -338,7 +342,7 @@ def run(
                 # The rotation order is first roll around X,
                 # then pitch around Y and finally yaw around Z,
                 # as in the ROS URDF rpy convention.
-            if not paper:
+            if not paper and not aer1217:
                 axs[3, 1].plot(real_time[idx], real_euler1, label='exp')
                 axs[4, 1].plot(real_time[idx], real_euler2, label='exp')
                 axs[5, 1].plot(real_time[idx], real_euler3, label='exp')
@@ -353,7 +357,7 @@ def run(
                 np.array(real_time[idx]), np.array(real_euler3), kind='linear')
             resampled_real_j[idx] = real_j_func(t_new[idx])
             #
-            if not paper:
+            if not paper and not aer1217:
                 axs[3, 1].plot(t_new[idx], resampled_real_r[idx], label='exp')
                 axs[4, 1].plot(t_new[idx], resampled_real_p[idx], label='exp')
                 axs[5, 1].plot(t_new[idx], resampled_real_j[idx], label='exp')
@@ -380,7 +384,7 @@ def run(
                                          sim_y[idx], label='sim')
                 axs[2, 1+3*sol_num].plot(sim_time[idx],
                                          sim_z[idx], label='sim')
-            else:
+            elif not aer1217:
                 axs[0, 3].plot(sim_time[idx], sim_x[idx], label='sim')
                 axs[1, 3].plot(sim_time[idx], sim_y[idx], label='sim')
                 axs[2, 3].plot(sim_time[idx], sim_z[idx], label='sim')
@@ -405,7 +409,7 @@ def run(
                                np.array(sim_ref_z[idx][initial_skip[idx]:]))**2)
             se_ref_count += len(resampled_real_ref_x[idx])
 
-            if not paper:
+            if not paper and not aer1217:
                 axs[0, 4].plot(
                     t_new[idx], (sim_x[idx][initial_skip[idx]:]-resampled_real_x[idx])**2,
                     label='diff')
@@ -554,7 +558,7 @@ def run(
             axs[2, 2+3*sol_num].plot(cropped_time, np.sqrt((avg_real_z-avg_sim_z)**2)
                                      -np.std(np.sqrt((cropped_real_z-cropped_sim_z)**2), axis=0),
                                      label='diff')
-        else:
+        elif not aer1217:
             axs[0, 4].plot(cropped_time, (avg_real_x-avg_sim_x)
                            ** 2, label='diff')
             axs[1, 4].plot(cropped_time, (avg_real_y-avg_sim_y)
@@ -585,7 +589,7 @@ def run(
 
         # labels
         # fig.suptitle(f'{sol}, rmse_xyz ({rmse_x:.2f} {rmse_y:.2f} {rmse_z:.2f})')
-        if not paper:
+        if not paper and not aer1217:
             fig.suptitle(
                 f'{sol}, avg rmse xyz {avg_rmse_x:.2f} {avg_rmse_y:.2f} {avg_rmse_z:.2f} \
                 rpj  {avg_rmse_r:.2f} {avg_rmse_p:.2f} {avg_rmse_j:.2f}')
@@ -675,7 +679,7 @@ def run(
                 axs[4, 4].set_ylim(0, 1.25*y_axis_range)
                 axs[5, 4].set_ylim(0, 5.5*y_axis_range)
 
-        if not paper:
+        if not paper and not aer1217:
             tikzplotlib.clean_figure(target_resolution=10, scale_precision=1.0)
             tikzplotlib.save('./tikz/' + sol + '.tex')
             plt.savefig('./png/' + sol + '.png')
@@ -722,10 +726,49 @@ def run(
         plt.savefig('./png/all.png')
         plt.show()
 
+    if aer1217:
+        fig = plt.figure()
+        axs = []
+        for i in range(5):
+            axs.append(fig.add_subplot(151+i, projection='3d'))
+            # axs[i] = plt.axes(projection='3d')
+            # axs[i].view_init(elev=20., azim=-35, roll=0)
+            axs[i].set_title(str(i))
+        for root, _, files in os.walk('./aer1217/data/baseline/'):
+            for file in files:
+                if file.endswith('.csv'):
+                    x, y, z = [], [], []
+                    with open(os.path.join(root, file), encoding='utf-8') as csv_file:
+                        csv_reader = csv.reader(csv_file, delimiter=',')
+                        for i, row in enumerate(csv_reader):
+                            if i == 0:
+                                continue
+                            x.append(float(row[2]))
+                            y.append(float(row[3]))
+                            z.append(float(row[4]))
+                    if 'A' in file:
+                        axs[0].plot(x, y, z, label=file)
+                    if 'C' in file:
+                        axs[1].plot(x, y, z, label=file)
+                    if 'D' in file and '6' not in file:
+                        axs[2].plot(x, y, z, label=file)
+                    if 'F' in file:
+                        axs[3].plot(x, y, z, label=file)
+                    if 'G' in file:
+                        axs[4].plot(x, y, z, label=file)
+        tikzplotlib.clean_figure(target_resolution=300, scale_precision=1.0)
+        tikzplotlib.save('./tikz/aer1217.tex')
+        plt.savefig('./png/aer1217.png')
+        plt.show()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parsing script')
     parser.add_argument('--paper',
+                        action='store_true',
+                        help='Test argument',
+                        )
+    parser.add_argument('--aer1217',
                         action='store_true',
                         help='Test argument',
                         )
