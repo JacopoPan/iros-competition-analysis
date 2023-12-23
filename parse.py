@@ -791,7 +791,7 @@ def run(
         tikzplotlib.clean_figure(target_resolution=300, scale_precision=1.0)
         tikzplotlib.save('./tikz/aer1217.tex')
         plt.savefig('./png/aer1217.png')
-        # plt.show()
+        plt.show()
         #
         for i in range(5):
             print(len(real_c[i]), len(real_d[i]), len(real_f[i]), len(real_g[i]))

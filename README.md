@@ -10,4 +10,5 @@ pip3 install matplotlib pybullet tikzplotlib scipy
 git clone https://github.com/JacopoPan/iros-competition-analysis.git
 cd iros-competition-analysis/
 python3 parse.py --paper
+python3 parse.py --aer1217
 ```
