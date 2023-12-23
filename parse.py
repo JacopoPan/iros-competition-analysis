@@ -20,6 +20,8 @@ import numpy as np
 import pybullet as p
 import tikzplotlib
 from scipy.interpolate import interp1d
+from scipy.spatial.distance import cdist, euclidean
+from copy import deepcopy
 
 # import bagpy
 # from bagpy import bagreader
@@ -734,32 +736,99 @@ def run(
             # axs[i] = plt.axes(projection='3d')
             # axs[i].view_init(elev=20., azim=-35, roll=0)
             axs[i].set_title(str(i))
+        real_c = []
+        real_d = []
+        real_f = []
+        real_g = []
         for root, _, files in os.walk('./aer1217/data/baseline/'):
             for file in files:
                 if file.endswith('.csv'):
                     x, y, z = [], [], []
                     with open(os.path.join(root, file), encoding='utf-8') as csv_file:
                         csv_reader = csv.reader(csv_file, delimiter=',')
+                        points3d = []
                         for i, row in enumerate(csv_reader):
                             if i == 0:
                                 continue
-                            x.append(float(row[2]))
-                            y.append(float(row[3]))
-                            z.append(float(row[4]))
+                            x.append(float(row[1]))
+                            y.append(float(row[2]))
+                            z.append(float(row[3]))
+                            points3d.append([float(row[1]), float(row[2]), float(row[3])])
                     if 'A' in file:
                         axs[0].plot(x, y, z, label=file)
                     if 'C' in file:
                         axs[1].plot(x, y, z, label=file)
+                        real_c.append(deepcopy(points3d))
                     if 'D' in file and '6' not in file:
                         axs[2].plot(x, y, z, label=file)
+                        real_d.append(deepcopy(points3d))
                     if 'F' in file:
                         axs[3].plot(x, y, z, label=file)
+                        real_f.append(deepcopy(points3d))
                     if 'G' in file:
                         axs[4].plot(x, y, z, label=file)
+                        real_g.append(deepcopy(points3d))
+        for root, _, files in os.walk('./aer1217/data/'):
+            for file in files:
+                if file.endswith('.csv'):
+                    x, y, z = [], [], []
+                    with open(os.path.join(root, file), encoding='utf-8') as csv_file:
+                        csv_reader = csv.reader(csv_file, delimiter=',')
+                        points3d = []
+                        for i, row in enumerate(csv_reader):
+                            if i == 0:
+                                continue
+                            points3d.append([float(row[0]), float(row[2]), float(row[4])])
+                    if 'teamc' in file:
+                        sim_c = deepcopy(points3d)
+                    if 'teamd' in file:
+                        sim_d = deepcopy(points3d)
+                    if 'teamf' in file:
+                        sim_f = deepcopy(points3d)
+                    if 'teamg-bis' in file:
+                        sim_g = deepcopy(points3d)
+        #
         tikzplotlib.clean_figure(target_resolution=300, scale_precision=1.0)
         tikzplotlib.save('./tikz/aer1217.tex')
         plt.savefig('./png/aer1217.png')
-        plt.show()
+        # plt.show()
+        #
+        for i in range(5):
+            print(len(real_c[i]), len(real_d[i]), len(real_f[i]), len(real_g[i]))
+        print(len(sim_c), len(sim_d), len(sim_f), len(sim_g))
+
+        errors = []
+        avg_errors = []
+        for i in range(5):
+            distances = cdist(sim_c, real_c[i], 'euclidean')
+            min_along_columns = np.min(distances, axis=0)
+            print(np.max(min_along_columns))
+            errors.append(np.max(min_along_columns))
+            avg_errors.append(np.average(min_along_columns))
+
+            distances = cdist(sim_d, real_d[i], 'euclidean')
+            min_along_columns = np.min(distances, axis=0)
+            print(np.max(min_along_columns))
+            errors.append(np.max(min_along_columns))
+            avg_errors.append(np.average(min_along_columns))
+
+
+            distances = cdist(sim_f, real_f[i], 'euclidean')
+            min_along_columns = np.min(distances, axis=0)
+            print(np.max(min_along_columns))
+            errors.append(np.max(min_along_columns))
+            avg_errors.append(np.average(min_along_columns))
+
+
+            distances = cdist(sim_g, real_g[i], 'euclidean')
+            min_along_columns = np.min(distances, axis=0)
+            print(np.max(min_along_columns))
+            errors.append(np.max(min_along_columns))
+            avg_errors.append(np.average(min_along_columns))
+
+
+        print("Average maximum Euclidean distance:", np.average(errors))
+        print("Average Euclidean distance:", np.average(avg_errors))
 
 
 if __name__ == '__main__':
