@@ -759,7 +759,7 @@ def run(
                     if 'C' in file:
                         axs[1].plot(x, y, z, label=file)
                         real_c.append(deepcopy(points3d))
-                    if 'D' in file and '6' not in file:
+                    if 'D' in file:
                         axs[2].plot(x, y, z, label=file)
                         real_d.append(deepcopy(points3d))
                     if 'F' in file:
